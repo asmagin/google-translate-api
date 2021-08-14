@@ -3,7 +3,7 @@ var Configstore = require('configstore');
 var languages = require('./languages.js');
 var translate = require('./index.js');
 
-const config = new Configstore('google-translate-api');
+var config = new Configstore('google-translate-api');
 
 test.beforeEach(() => {
     config.clear();
@@ -35,6 +35,15 @@ test('translate several sentences with spaces (#73)', async t => {
     const res = await translate(
         'translator, translator. translator! translator? translator,translator.translator!translator?',
         {from: 'auto', to: 'nl'}
+    );
+
+    t.is(res.text, 'vertaler, vertaler. vertaler! vertaler? Vertaler, vertaler.translator! Vertaler?');
+});
+
+test('translate several sentences with spaces (#73) with client proxy', async t => {
+    const res = await translate(
+        'translator, translator. translator! translator? translator,translator.translator!translator?',
+        {from: 'auto', to: 'nl', sd: 'd1aphpd63trzzv.cloudfront', tld: 'net'}
     );
 
     t.is(res.text, 'vertaler, vertaler. vertaler! vertaler? Vertaler, vertaler.translator! Vertaler?');
@@ -163,14 +172,12 @@ test('translate via an external language from outside of the API', async t => {
 test('pass got options', async t => {
     let a = 0;
     const gotopts = {
-        hooks: {
-            afterResponse: [
-                response => {
-                    a++;
-                    return response;
-                }
-            ]
-        }
+        transformResponse: [
+            response => {
+                a++;
+                return response;
+            }
+        ]
     };
     const res = await translate('vertaler', {}, gotopts);
 
